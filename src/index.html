@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+  <title>Jebba ACC Operations</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div class="app-frame">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a class="brand" href="#" aria-label="Jebba ACC home">
+          <span class="brand-mark">J</span>
+          <span><strong>JEBBA ACC</strong><small>OPERATIONS</small></span>
+        </a>
+        <div class="capture-clock" aria-live="off">
+          <small>CAPTURE TIME · NIGERIA</small>
+          <strong id="capture-clock">--:--:--</strong>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-item active" data-page="dashboard" aria-current="page">Dashboard</button>
+        <button class="nav-item" data-page="new">New Entry</button>
+        <button class="nav-item" data-page="outages">Outages</button>
+        <button class="nav-item" data-page="handover">Shift Handover</button>
+        <button class="nav-item" data-page="reports">Reports</button>
+      </nav>
+      <div class="top-actions">
+        <span class="shift-chip"><i></i><span id="shift-label">Loading shift…</span></span>
+        <button class="icon-button" id="menu-button" aria-label="More options">•••</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow" id="page-kicker">CONTROL ROOM</p>
+          <h1 id="page-title">Dashboard</h1>
+          <p class="subheading" id="page-subtitle">Operational overview for Jebba Area Control Centre.</p>
+        </div>
+        <div class="heading-actions">
+          <button class="button secondary" id="backup-button">Back up records</button>
+          <button class="button primary" id="new-entry-button">＋ New Entry</button>
+        </div>
+      </section>
+
+      <section class="page active-page" id="page-dashboard">
+        <div class="stat-grid" id="stats">
+          <div class="stat-card skeleton-card"><div class="skeleton sk-line"></div><div class="skeleton sk-number"></div><div class="skeleton sk-line short"></div></div>
+          <div class="stat-card skeleton-card"><div class="skeleton sk-line"></div><div class="skeleton sk-number"></div><div class="skeleton sk-line short"></div></div>
+          <div class="stat-card skeleton-card"><div class="skeleton sk-line"></div><div class="skeleton sk-number"></div><div class="skeleton sk-line short"></div></div>
+          <div class="stat-card skeleton-card"><div class="skeleton sk-line"></div><div class="skeleton sk-number"></div><div class="skeleton sk-line short"></div></div>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Ongoing Events</h2><p>Open incidents requiring attention.</p></div><button class="text-button" data-go="outages">View all</button></div>
+            <div id="open-events" class="event-list" aria-live="polite"><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Recent Activity</h2><p>Latest records and updates.</p></div></div>
+            <div id="recent-activity" class="activity-list"></div>
+          </section>
+        </div>
+        <section class="panel handover-strip">
+          <div><h2>Shift Handover</h2><p>Review unresolved events before the next shift takes over.</p></div>
+          <button class="button secondary" data-go="handover">Review handover</button>
+        </section>
+      </section>
+
+      <section class="page" id="page-new">
+        <div class="editor-grid">
+          <section class="panel form-panel">
+            <div class="panel-heading"><div><h2>Event Details</h2><p>Enter the event facts. The entry time and shift are captured automatically.</p></div></div>
+            <form id="event-form" novalidate>
+              <div class="form-grid">
+                <div class="field span-2"><label for="classification">Event Classification <b>*</b></label><select id="classification" required><option value="">Select classification</option><option>Forced Outage</option><option>Planned Outage</option><option>Urgent Outage</option><option>Emergency Outage</option></select></div>
+                <div class="field"><label for="event-date">Event Date <b>*</b></label><input id="event-date" type="date" required></div>
+                <div class="field"><label for="event-time">Event Time <b>*</b></label><input id="event-time" type="time" required></div>
+                <div class="field"><label for="voltage">Voltage Level</label><input id="voltage" list="voltage-options" placeholder="Select or type voltage"><datalist id="voltage-options"><option value="330 kV"><option value="132 kV"><option value="33 kV"></datalist></div>
+                <div class="field"><label for="feeder">Feeder / Line</label><input id="feeder" list="feeder-options" placeholder="Select or type feeder"><datalist id="feeder-options"></datalist></div>
+                <div class="field"><label for="equipment">Equipment</label><input id="equipment" list="equipment-options" placeholder="Select or type equipment"><datalist id="equipment-options"><option value="Circuit breaker"><option value="Transformer"><option value="Busbar"><option value="Transmission line"><option value="Isolator"><option value="CT / PT"></datalist></div>
+                <div class="field"><label for="protection">Protection / Fault Indication</label><input id="protection" list="protection-options" placeholder="Select or type indication"><datalist id="protection-options"><option value="Distance Protection"><option value="Overcurrent Protection"><option value="Earth Fault"><option value="Differential Protection"><option value="Busbar Protection"></datalist></div>
+                <div class="field"><label for="last-load">Last Load Before Event (MW)</label><input id="last-load" inputmode="decimal" placeholder="Enter MW"></div>
+                <div class="field"><label for="interrupted-load">Load Interrupted (MW)</label><input id="interrupted-load" inputmode="decimal" placeholder="Enter MW"></div>
+                <div class="field span-2"><label for="description">Event Description <b>*</b></label><textarea id="description" rows="3" required placeholder="Describe what happened. Record observed facts, not assumptions."></textarea></div>
+                <div class="field span-2"><label for="remarks">Remarks / Additional Observations</label><textarea id="remarks" rows="2" placeholder="Additional operational details…"></textarea></div>
+              </div>
+              <div class="form-footer"><span class="form-note">* Required fields. Recorded time and shift are automatic.</span><button type="submit" class="button primary">Save Event</button></div>
+              <div class="inline-message" id="form-message" role="status"></div>
+            </form>
+          </section>
+          <section class="panel preview-panel">
+            <div class="panel-heading"><div><h2>Report Preview</h2><p>Preview updates as you complete the form.</p></div><span class="preview-tag">LIVE PREVIEW</span></div>
+            <div class="preview-well">
+              <article class="paper" aria-label="Operational event preview">
+                <div class="paper-brand">TRANSMISSION COMPANY OF NIGERIA</div>
+                <h3>JEBBA AREA CONTROL CENTRE</h3>
+                <div class="paper-rule"></div>
+                <h4>OPERATIONAL EVENT RECORD</h4>
+                <div class="paper-meta"><div><small>EVENT DATE</small><strong id="pv-date">—</strong></div><div><small>EVENT TIME</small><strong id="pv-time">—</strong></div></div>
+                <div class="paper-meta"><div><small>CLASSIFICATION</small><strong id="pv-class">—</strong></div><div><small>VOLTAGE</small><strong id="pv-voltage">—</strong></div></div>
+                <div class="paper-section"><small>FEEDER / LINE</small><p id="pv-feeder">—</p></div>
+                <div class="paper-section"><small>EQUIPMENT / PROTECTION</small><p id="pv-equipment">—</p><p id="pv-protection"></p></div>
+                <div class="paper-section"><small>EVENT DESCRIPTION</small><p id="pv-description">Your event narrative will appear here as you type.</p></div>
+                <div class="paper-section"><small>REMARKS</small><p id="pv-remarks">—</p></div>
+                <div class="paper-foot">Preview only · Confirm operational facts before saving</div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-outages">
+        <section class="panel">
+          <div class="panel-heading"><div><h2>Outage Register</h2><p>Search and update existing events. One incident can have multiple shift updates.</p></div><button class="button primary" data-go="new">＋ New Entry</button></div>
+          <div class="toolbar"><input id="event-search" placeholder="Search reference, feeder, equipment or description…"><select id="status-filter"><option value="All">All statuses</option><option>Open</option><option>Restored</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>Reference</th><th>Classification</th><th>Feeder / Equipment</th><th>Event time</th><th>Shift</th><th>Status</th><th></th></tr></thead><tbody id="event-table"><tr><td colspan="7" class="empty">Loading records…</td></tr></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-handover">
+        <section class="panel">
+          <div class="panel-heading"><div><h2>Shift Handover</h2><p>Outstanding events are carried forward automatically between shifts.</p></div><span class="shift-chip" id="handover-shift">Current shift</span></div>
+          <div id="handover-list" class="event-list"></div>
+          <p class="notice">Handover is based on the event history and timestamps. No operator name is collected.</p>
+        </section>
+      </section>
+
+      <section class="page" id="page-reports">
+        <div class="report-grid">
+          <section class="panel"><h2>Weekly Operational Report</h2><p>Compile saved records for review and export to the TCN Word report format.</p><div class="field"><label for="report-from">Period start</label><input id="report-from" type="date"></div><div class="field"><label for="report-to">Period end</label><input id="report-to" type="date"></div><button class="button primary" id="report-preview-button">Prepare report</button><p class="form-note">Word-template formatting will be connected after the existing TCN report template is added to the project.</p></section>
+          <section class="panel"><h2>Local Data & Backups</h2><p>Your records remain on this computer. Create regular backups to protect operational history.</p><div class="backup-actions"><button class="button secondary" id="backup-button-2">Export backup</button><button class="button secondary" id="restore-button">Restore backup</button></div><p class="form-note">Restoring merges records by unique ID; it does not overwrite existing entries.</p></section>
+        </div>
+      </section>
+    </main>
+    <footer class="app-footer"><span>Jebba Area Control Centre · Offline operational workspace</span><span id="footer-status">LOCAL DATABASE · OFFLINE READY</span></footer>
+  </div>
+
+  <div class="modal-backdrop" id="duplicate-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="duplicate-title">
+      <div class="modal-head"><div><p class="eyebrow">DUPLICATE CHECK</p><h2 id="duplicate-title">Possible existing event</h2></div><button class="icon-button" id="close-modal" aria-label="Close">×</button></div>
+      <p class="modal-copy">A matching open event was found. Review it before creating another record for the same incident.</p>
+      <div id="duplicate-results"></div>
+      <div class="modal-actions"><button class="button secondary" id="create-separate">This is a different event</button></div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="event-modal" hidden>
+    <section class="modal wide-modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+      <div class="modal-head"><div><p class="eyebrow">EVENT HISTORY</p><h2 id="event-modal-title">Event details</h2></div><button class="icon-button" id="close-event-modal" aria-label="Close">×</button></div>
+      <div id="event-detail"></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "jebba-acc-operations",
+  "version": "0.1.0",
+  "description": "Offline operational reporting system for TCN Jebba Area Control Centre",
+  "main": "src/main.cjs",
+  "author": "Jebba ACC",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1"
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "ng.tcn.jebbaacc.operations",
+    "productName": "Jebba ACC Operations",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "npmRebuild": true,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "Jebba-ACC-Operations-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true
+    }
+  }
+}
