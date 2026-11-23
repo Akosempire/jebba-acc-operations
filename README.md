@@ -4,13 +4,14 @@ The Windows installer is built automatically whenever changes are pushed to `mai
 
 ## Download and install
 
-1. Open the repository's **Actions** tab and select the latest successful **Build Jebba ACC Windows Installer** run.
-2. Download the **Jebba-ACC-Windows-Installer** artifact and extract it.
-3. Double-click `Jebba-ACC-Operations-Setup-0.1.0.exe` and follow the one-click installer.
+1. Open the repository's **Releases** page and download `Jebba-ACC-Operations-Setup-0.1.0.exe`.
+2. Double-click the installer and follow the one-click installation.
+
+If a release is not available yet, open the repository's **Actions** tab, select the latest successful **Build Jebba ACC Windows Installer** run, and download and extract the **Jebba-ACC-Windows-Installer** artifact.
 
 The installer is configured for a per-user installation without a destination-folder prompt. It creates Desktop and Start Menu shortcuts and launches the app after installation. GitHub Actions rebuilds the installer after every push to `main`; workflow-dispatch builds are also available from the Actions page.
 
-GitHub performs the packaging on a Windows runner. The app needs no cloud database or Supabase; normal application data is stored locally on the Windows computer.
+GitHub performs the packaging on a Windows runner after every push to `main`; workflow-dispatch builds are also available from the Actions page. The app needs no cloud database or Supabase; normal application data is stored locally on the Windows computer.
 
 **Windows security note:** this installer is not code-signed. Windows SmartScreen or an organisation's endpoint-security policy may warn about or block an unknown publisher. If TCN policy blocks unsigned software, an authorised IT administrator must approve it or arrange code signing before deployment. Do not bypass organisational security controls.
 
