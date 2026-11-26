@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ['v*']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -34,3 +35,12 @@ jobs:
           path: release/*.exe
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          $installer = ".\release\Jebba-ACC-Operations-Setup-$version.exe"
+          gh release create "$env:GITHUB_REF_NAME" $installer --repo Akosempire/jebba-acc-operations --title "Jebba ACC Operations $env:GITHUB_REF_NAME" --notes "One-click per-user Windows installer. Follow your organisation's software approval policy."
+        env:
+          GH_TOKEN: ${{ github.token }}

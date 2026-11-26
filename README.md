@@ -9,7 +9,7 @@ The Windows installer is built automatically whenever changes are pushed to `mai
 
 If a release is not available yet, open the repository's **Actions** tab, select the latest successful **Build Jebba ACC Windows Installer** run, and download and extract the **Jebba-ACC-Windows-Installer** artifact.
 
-The installer is configured for a per-user installation without a destination-folder prompt. It creates Desktop and Start Menu shortcuts and launches the app after installation. GitHub Actions rebuilds the installer after every push to `main`; workflow-dispatch builds are also available from the Actions page.
+The installer is configured for a per-user installation without a destination-folder prompt. It creates Desktop and Start Menu shortcuts and launches the app after installation. GitHub Actions rebuilds the installer after every push to `main`; pushing a `v*` version tag also publishes a GitHub Release with the installer attached.
 
 GitHub performs the packaging on a Windows runner after every push to `main`; workflow-dispatch builds are also available from the Actions page. The app needs no cloud database or Supabase; normal application data is stored locally on the Windows computer.
 
