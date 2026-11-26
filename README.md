@@ -4,7 +4,7 @@ The Windows installer is built automatically whenever changes are pushed to `mai
 
 ## Download and install
 
-1. Open the repository's **Releases** page and download `Jebba-ACC-Operations-Setup-0.1.0.exe`.
+1. Open the repository's **Releases** page and download the latest `Jebba-ACC-Operations-Setup` installer.
 2. Double-click the installer and follow the one-click installation.
 
 If a release is not available yet, open the repository's **Actions** tab, select the latest successful **Build Jebba ACC Windows Installer** run, and download and extract the **Jebba-ACC-Windows-Installer** artifact.
@@ -24,6 +24,7 @@ GitHub performs the packaging on a Windows runner after every push to `main`; wo
   - Night Shift: 18:00 inclusive to 08:00 exclusive.
 - No operator-name field.
 - Event creation for Forced, Planned, Urgent, and Emergency Outages.
+- Separate date/time and narrative capture for Miscellaneous weekly report entries; these are not outage records.
 - Editable text fields with suggestions; operators can type values not already suggested.
 - Duplicate check against open events with matching classification and feeder or equipment.
 - One event record with an append-only update history.

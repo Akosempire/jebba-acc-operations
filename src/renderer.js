@@ -39,9 +39,10 @@ function showToast(msg) {
 function setPage(page) {
   $$('.page').forEach(p=>p.classList.toggle('active-page',p.id===`page-${page}`));
   $$('.nav-item').forEach(b=>{const active=b.dataset.page===page;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
-  const titles={dashboard:['Dashboard','Operational overview for Jebba Area Control Centre.','CONTROL ROOM'],new:['New Operational Entry','Record an event and preview its report narrative.','EVENT CAPTURE'],outages:['Outage Register','Find existing incidents and append operational updates.','EVENT MANAGEMENT'],handover:['Shift Handover','Review unresolved events carried between shifts.','SHIFT CONTINUITY'],reports:['Reports & Backups','Prepare reporting periods and protect local records.','REPORTING']};
+  const titles={dashboard:['Dashboard','Operational overview for Jebba Area Control Centre.','CONTROL ROOM'],new:['New Operational Entry','Record outages and miscellaneous weekly report entries.','EVENT CAPTURE'],outages:['Outage Register','Find existing incidents and append operational updates.','EVENT MANAGEMENT'],handover:['Shift Handover','Review unresolved events carried between shifts.','SHIFT CONTINUITY'],reports:['Reports & Backups','Prepare reporting periods and protect local records.','REPORTING']};
   const [title,sub,kicker]=titles[page];$('#page-title').textContent=title;$('#page-subtitle').textContent=sub;$('#page-kicker').textContent=kicker;
   if(page==='dashboard') refreshDashboard();
+  if(page==='new') renderMiscellaneous();
   if(page==='outages') renderEvents();
   if(page==='handover') renderHandover();
 }
@@ -84,6 +85,27 @@ async function refreshDashboard() {
 }
 function eventRow(e) {
   return `<div class="event-row" data-id="${e.id}" tabindex="0" role="button"><div><div class="event-title">${escapeHtml(e.feeder||e.equipment||'Unspecified equipment')} · ${escapeHtml(e.classification)}</div><div class="event-meta">${escapeHtml(e.reference)} · Event ${fmtDate(e.event_datetime)} · ${escapeHtml(e.shift)}</div></div><span class="status">${escapeHtml(e.status)}</span></div>`;
+}
+function formatMiscellaneousDate(value) {
+  const [date, time] = value.split('T');
+  return `${date.split('-').reverse().join('/')}${time ? ` ${time}` : ''}`;
+}
+async function renderMiscellaneous() {
+  const entries = await window.jebba.listMiscellaneous();
+  $('#miscellaneous-list').innerHTML=entries.length?entries.map(entry=>`<article class="miscellaneous-item"><strong>${formatMiscellaneousDate(entry.occurred_at)}</strong><p>${escapeHtml(entry.description)}</p></article>`).join(''):'<div class="empty">No miscellaneous entries recorded yet.</div>';
+}
+async function submitMiscellaneous(e) {
+  e.preventDefault();
+  const date=$('#miscellaneous-date').value;
+  const time=$('#miscellaneous-time').value;
+  const description=$('#miscellaneous-description').value.trim();
+  if(!date||!description){$('#miscellaneous-message').textContent='Enter the entry date and report narrative.';return}
+  await window.jebba.createMiscellaneous({occurred_at:`${date}${time?`T${time}`:''}`,description});
+  $('#miscellaneous-form').reset();
+  $('#miscellaneous-date').value=nowLocalParts().date;
+  $('#miscellaneous-message').textContent='';
+  await renderMiscellaneous();
+  showToast('Miscellaneous report entry saved.');
 }
 async function renderEvents() {
   currentEvents=await window.jebba.listEvents();
@@ -144,6 +166,7 @@ function wire() {
   $$('[data-go]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.go)));
   $('#new-entry-button').addEventListener('click',()=>{resetForm();setPage('new')});
   $('#event-form').addEventListener('submit',submitEvent);
+  $('#miscellaneous-form').addEventListener('submit',submitMiscellaneous);
   $$('#event-form input,#event-form select,#event-form textarea').forEach(el=>el.addEventListener('input',updatePreview));
   $('#event-search').addEventListener('input',renderEvents);$('#status-filter').addEventListener('change',renderEvents);
   $('#create-separate').addEventListener('click',()=>{const p=pendingPayload;$('#duplicate-modal').hidden=true;submitEventFromPayload(p,true)});
@@ -152,7 +175,7 @@ function wire() {
   $('#duplicate-modal').addEventListener('click',e=>{if(e.target.id==='duplicate-modal')e.currentTarget.hidden=true});
   $('#event-modal').addEventListener('click',e=>{if(e.target.id==='event-modal')e.currentTarget.hidden=true});
   $('#backup-button').addEventListener('click',doBackup);$('#backup-button-2').addEventListener('click',doBackup);
-  $('#restore-button').addEventListener('click',async()=>{try{const r=await window.jebba.restore();if(!r.cancelled){showToast(`Backup merged: ${r.imported} event records checked.`);refreshDashboard();renderEvents()}}catch(e){showToast(e.message)}});
+  $('#restore-button').addEventListener('click',async()=>{try{const r=await window.jebba.restore();if(!r.cancelled){showToast(`Backup merged: ${r.events} event records and ${r.miscellaneous} miscellaneous entries checked.`);refreshDashboard();renderEvents();renderMiscellaneous()}}catch(e){showToast(e.message)}});
   $('#report-preview-button').addEventListener('click',()=>showToast('Report compilation is the next implementation stage.'));
 }
 async function submitEventFromPayload(p, force) {
@@ -168,6 +191,7 @@ async function init() {
   $('#footer-status').textContent='LOCAL DATABASE · OFFLINE READY';
   $('#handover-shift').textContent=shiftFor();
   resetForm();
+  $('#miscellaneous-date').value=nowLocalParts().date;
   await refreshDashboard();
   // Re-evaluate the shift at minute boundaries while the app remains open.
   setInterval(()=>{$('#shift-label').textContent=shiftFor();$('#handover-shift').textContent=shiftFor();updateCaptureClock()},1000);

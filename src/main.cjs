@@ -40,9 +40,16 @@ function initDb() {
       shift TEXT NOT NULL,
       FOREIGN KEY(event_id) REFERENCES events(id)
     );
+    CREATE TABLE IF NOT EXISTS miscellaneous_entries (
+      id TEXT PRIMARY KEY,
+      occurred_at TEXT NOT NULL,
+      description TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
     CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
     CREATE INDEX IF NOT EXISTS idx_events_feeder ON events(feeder);
     CREATE INDEX IF NOT EXISTS idx_updates_event ON event_updates(event_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_miscellaneous_occurred_at ON miscellaneous_entries(occurred_at);
   `);
 }
 function allEvents() {
@@ -51,6 +58,24 @@ function allEvents() {
     ...e,
     updates: db.prepare(`SELECT * FROM event_updates WHERE event_id=? ORDER BY created_at ASC`).all(e.id)
   }));
+}
+function allMiscellaneous() {
+  return db.prepare(`SELECT * FROM miscellaneous_entries ORDER BY occurred_at DESC, created_at DESC`).all();
+}
+function createMiscellaneous(p) {
+  const occurredAt = String(p.occurred_at || '').trim();
+  const description = String(p.description || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(occurredAt) || !description) {
+    throw new Error('Enter a valid entry date and report narrative.');
+  }
+  const entry = {
+    id: crypto.randomUUID(),
+    occurred_at: occurredAt,
+    description,
+    created_at: new Date().toISOString()
+  };
+  db.prepare(`INSERT INTO miscellaneous_entries (id, occurred_at, description, created_at) VALUES (@id, @occurred_at, @description, @created_at)`).run(entry);
+  return entry;
 }
 function dashboard() {
   const total = db.prepare(`SELECT COUNT(*) n FROM events`).get().n;
@@ -128,7 +153,7 @@ function backupDb() {
     filters: [{ name: 'JSON backup', extensions: ['json'] }]
   });
   if (!result) return { cancelled: true };
-  const payload = { format:'jebba-acc-backup-v1', exportedAt:new Date().toISOString(), events:allEvents() };
+  const payload = { format:'jebba-acc-backup-v1', exportedAt:new Date().toISOString(), events:allEvents(), miscellaneous:allMiscellaneous() };
   fs.writeFileSync(result, JSON.stringify(payload, null, 2), 'utf8');
   return { cancelled:false, path:result };
 }
@@ -136,9 +161,11 @@ function restoreDb() {
   const chosen = dialog.showOpenDialogSync({ title:'Restore Jebba ACC backup', properties:['openFile'], filters:[{name:'JSON backup',extensions:['json']}] });
   if (!chosen || !chosen[0]) return { cancelled:true };
   const payload = JSON.parse(fs.readFileSync(chosen[0], 'utf8'));
-  if (payload.format !== 'jebba-acc-backup-v1' || !Array.isArray(payload.events)) throw new Error('This file is not a recognised Jebba ACC backup.');
+  if (payload.format !== 'jebba-acc-backup-v1' || !Array.isArray(payload.events) || (payload.miscellaneous !== undefined && !Array.isArray(payload.miscellaneous))) throw new Error('This file is not a recognised Jebba ACC backup.');
   const insertEvent = db.prepare(`INSERT OR IGNORE INTO events VALUES (@id,@reference,@classification,@voltage,@feeder,@equipment,@event_datetime,@recorded_at,@shift,@status,@description,@protection,@last_load_mw,@interrupted_load_mw,@restoration_datetime,@remarks,@created_at,@updated_at)`);
   const insertUpdate = db.prepare(`INSERT OR IGNORE INTO event_updates VALUES (@id,@event_id,@update_type,@body,@created_at,@shift)`);
+  const insertMiscellaneous = db.prepare(`INSERT OR IGNORE INTO miscellaneous_entries (id, occurred_at, description, created_at) VALUES (@id, @occurred_at, @description, @created_at)`);
+  const miscellaneous = payload.miscellaneous || [];
   const tx = db.transaction(() => {
     const eventColumns = ['id','reference','classification','voltage','feeder','equipment','event_datetime','recorded_at','shift','status','description','protection','last_load_mw','interrupted_load_mw','restoration_datetime','remarks','created_at','updated_at'];
     for (const e of payload.events) {
@@ -148,9 +175,17 @@ function restoreDb() {
         insertUpdate.run({ id:u.id, event_id:u.event_id, update_type:u.update_type, body:u.body, created_at:u.created_at, shift:u.shift });
       }
     }
+    for (const entry of miscellaneous) {
+      insertMiscellaneous.run({
+        id:entry.id,
+        occurred_at:entry.occurred_at,
+        description:entry.description,
+        created_at:entry.created_at
+      });
+    }
   });
   tx();
-  return { cancelled:false, imported:payload.events.length };
+  return { cancelled:false, imported:payload.events.length + miscellaneous.length, events:payload.events.length, miscellaneous:miscellaneous.length };
 }
 function createWindow() {
   const win = new BrowserWindow({
@@ -168,9 +203,11 @@ function createWindow() {
 app.whenReady().then(() => {
   initDb();
   ipcMain.handle('events:list', () => allEvents());
+  ipcMain.handle('miscellaneous:list', () => allMiscellaneous());
   ipcMain.handle('events:dashboard', () => dashboard());
   ipcMain.handle('events:duplicates', (_, p) => findDuplicates(p));
   ipcMain.handle('events:create', (_, p) => createEvent(p));
+  ipcMain.handle('miscellaneous:create', (_, p) => createMiscellaneous(p));
   ipcMain.handle('events:update', (_, p) => addUpdate(p));
   ipcMain.handle('data:backup', () => backupDb());
   ipcMain.handle('data:restore', () => restoreDb());

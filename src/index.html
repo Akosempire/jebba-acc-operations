@@ -111,6 +111,20 @@
             </div>
           </section>
         </div>
+        <section class="panel miscellaneous-panel">
+          <div class="panel-heading"><div><h2>Miscellaneous Report Entries</h2><p>Capture narrative items for the MISCELLANEOUS section of the weekly report. These are not outage records.</p></div></div>
+          <form id="miscellaneous-form">
+            <div class="form-grid">
+              <div class="field"><label for="miscellaneous-date">Entry Date <b>*</b></label><input id="miscellaneous-date" type="date" required></div>
+              <div class="field"><label for="miscellaneous-time">Time (if applicable)</label><input id="miscellaneous-time" type="time"></div>
+              <div class="field span-2"><label for="miscellaneous-description">Report Narrative <b>*</b></label><textarea id="miscellaneous-description" rows="3" required placeholder="Example: PM(T)Engr Sulaiman received a set of breakers and one control box from Camwire for safe keeping in the 33 kV switchyard."></textarea></div>
+            </div>
+            <div class="form-footer"><span class="form-note">Enter one report item. Date and time are kept separately from the narrative.</span><button type="submit" class="button primary">Save Miscellaneous Entry</button></div>
+            <div class="inline-message" id="miscellaneous-message" role="status"></div>
+          </form>
+          <h3 class="miscellaneous-list-heading">Saved Miscellaneous Entries</h3>
+          <div id="miscellaneous-list" class="miscellaneous-list"><div class="empty">Loading entries…</div></div>
+        </section>
       </section>
 
       <section class="page" id="page-outages">
