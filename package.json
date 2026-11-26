@@ -1,6 +1,6 @@
 {
   "name": "jebba-acc-operations",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Offline operational reporting system for TCN Jebba Area Control Centre",
   "main": "src/main.cjs",
   "author": "Jebba ACC",

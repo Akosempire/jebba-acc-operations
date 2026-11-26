@@ -39,10 +39,10 @@ function showToast(msg) {
 function setPage(page) {
   $$('.page').forEach(p=>p.classList.toggle('active-page',p.id===`page-${page}`));
   $$('.nav-item').forEach(b=>{const active=b.dataset.page===page;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
-  const titles={dashboard:['Dashboard','Operational overview for Jebba Area Control Centre.','CONTROL ROOM'],new:['New Operational Entry','Record outages and miscellaneous weekly report entries.','EVENT CAPTURE'],outages:['Outage Register','Find existing incidents and append operational updates.','EVENT MANAGEMENT'],handover:['Shift Handover','Review unresolved events carried between shifts.','SHIFT CONTINUITY'],reports:['Reports & Backups','Prepare reporting periods and protect local records.','REPORTING']};
+  const titles={dashboard:['Dashboard','Operational overview for Jebba Area Control Centre.','CONTROL ROOM'],new:['New Operational Entry','Record an outage and preview its report narrative.','EVENT CAPTURE'],miscellaneous:['Miscellaneous Entries','Capture narrative items for the weekly report.','MISCELLANEOUS'],outages:['Outage Register','Find existing incidents and append operational updates.','EVENT MANAGEMENT'],handover:['Shift Handover','Review unresolved events carried between shifts.','SHIFT CONTINUITY'],reports:['Reports & Backups','Prepare reporting periods and protect local records.','REPORTING']};
   const [title,sub,kicker]=titles[page];$('#page-title').textContent=title;$('#page-subtitle').textContent=sub;$('#page-kicker').textContent=kicker;
   if(page==='dashboard') refreshDashboard();
-  if(page==='new') renderMiscellaneous();
+  if(page==='miscellaneous') renderMiscellaneous();
   if(page==='outages') renderEvents();
   if(page==='handover') renderHandover();
 }

@@ -24,7 +24,7 @@ GitHub performs the packaging on a Windows runner after every push to `main`; wo
   - Night Shift: 18:00 inclusive to 08:00 exclusive.
 - No operator-name field.
 - Event creation for Forced, Planned, Urgent, and Emergency Outages.
-- Separate date/time and narrative capture for Miscellaneous weekly report entries; these are not outage records.
+- Dedicated Miscellaneous tab for date/time and narrative weekly report entries; these are not outage records.
 - Editable text fields with suggestions; operators can type values not already suggested.
 - Duplicate check against open events with matching classification and feeder or equipment.
 - One event record with an append-only update history.
